@@ -1,0 +1,19 @@
+input{
+	font-family:"Comic Sans MS";
+}
+button{
+	font-family:"Comic Sans MS";
+}
+.navbar{
+	background-color:rgb(148,37,32);
+}
+.caret{
+	color:white;
+}
+.tournaments{
+	color:white;
+}
+.navbar-default .navbar-nav > li > a {
+	color:white;
+}
+
