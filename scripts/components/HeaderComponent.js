@@ -25,7 +25,13 @@ module.exports = React.createClass({
 		this.gettournaments(this);
 		window.events.userchanged = function(){
 			var currentUser = Parse.User.current();
-			me.setState({username:currentUser.get('username')})
+			if (currentUser){
+				me.setState({username:currentUser.get('username')})
+			}
+			else{
+			me.setState({username:null})
+		}
+
 		}
 	},
 	GoToSignUp:function(){
@@ -112,6 +118,11 @@ module.exports = React.createClass({
 	  }
 	});
 },
+	signout: function(){
+		window.userProfile = null
+		Parse.User.logOut();
+		window.events.userchanged();
+	},
 
 
 	render: function() {
@@ -139,7 +150,17 @@ module.exports = React.createClass({
 			<div className="logincontainerfour logincolum1"></div>
 		</form>
 		}
-		
+		var loggedinhtml;
+		if (this.state.username) {
+		  loggedinhtml =
+		  <ul>
+			  <li><a href="#/invite">Team Invites</a></li>
+	          <li><a href="#profile">My Profile</a></li>
+	          <li><a href="#" onClick={this.signout}>Sign Out</a></li>
+	      </ul>
+		} else {
+		  loggedinhtml = '' 
+		}
 		return (				
 				<nav className="navbar navbar-default">
   <div className="container-fluid">
@@ -162,23 +183,23 @@ module.exports = React.createClass({
             <li>
              {signinhtml}
             </li>
-            <li><a href="#">Team Invites</a></li>
-            <li><a href="#profile">My Profile</a></li>
-            <li><a href="#">Sign Out</a></li>
-
+            {loggedinhtml}
           </ul>
         </li>
       </ul>
       <ul className="nav navbar-nav navbar-right">
-        <li className="tournaments"><a href="#/tournament">Support</a></li>
+        <li className="tournaments"><a href="#/support">Support</a></li>
         <li className="dropdown">
           <a href="#" className="dropdown-toggle support" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Tournament <span class="caret"></span></a>
           <ul className="dropdown-menu">
+
      			{this.state.tournaments.map(function(m,index){
                 	return <li><a href={"#/tournamentinfo/" + m.id}>{m.get('Name')}</a></li>
                 })}
           </ul>
         </li>
+        <li className="homepage"><a href="#/">Home Page</a></li>
+        <li className="buycreds"><a href="#/paypal">Buy Credits</a></li>
       </ul>
     </div>
   </div>

@@ -5,15 +5,18 @@
 	<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="scripts/styles/style
 	.css">
+	<link rel="stylesheet" type="text/css" href="http://raw.githubusercontent.com/teijo/jquery-bracket/master/dist/jquery.bracket.min.css">
 </head>
 <body>
+	<div id="bracket"> </div>
 	<main id="header"></main>
 	<main id="container">
-		<h1>Welcome to your new app</h1>
+		<h1></h1>
 	</main>
-	<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
-	<script type="text/javascript" src="dist/all.js"></script>
 	<script src="http://www.parsecdn.com/js/parse-1.4.2.min.js"></script>
+	<script type="text/javascript" src="bower_components/jquery/dist/jquery.js"></script>
+	<script type="text/javascript" src="scripts/Brackets.js"></script>
+	<script type="text/javascript" src="dist/all.js"></script>
 	<script type="text/javascript">
 		Parse.initialize(window.appId, window.appKey); 
 	</script>

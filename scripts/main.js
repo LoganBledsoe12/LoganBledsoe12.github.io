@@ -10,8 +10,10 @@ var LogIn = require  ('./components/LogInComponent');
 var UserProfile = require ('./components/ProfileComponent.js');
 var HomePage = require ('./components/HomePageComponent.js');
 var Header = require ('./components/HeaderComponent.js');
+var Support = require ('./components/SupportComponent.js');
 var TeamProfile = require ('./components/TeamProfileComponent.js');
 var PayPal = require ('./components/PayPalComponent.js');
+var TeamInvite = require ('./components/TeamInviteComponent.js')
 window.appKey = ('S50qociHrxbaE0knB6LZawcp4MdWiHFu7myR6tyw');
 window.appId = ('WfZ0jpkhseGLlEz2RcIhmkTK1jGQdvmILzE7dC7U');
 window.userProfile = null
@@ -31,7 +33,9 @@ var App = Backbone.Router.extend({
         'paypal': 'paypal',
         'addcash':'addcash',
         'tournamentjoin/:tournamentid': 'tournamentjoin',
-        'teamprofile/:teamid': 'teamprofile'
+        'teamprofile/:teamid': 'teamprofile',
+        'invite':'invite',
+        'support': 'support'
        
     },
     home: function(){
@@ -40,7 +44,21 @@ var App = Backbone.Router.extend({
 		document.getElementById('container')
 		);
 	},
+	support: function(){
+	    React.render(
+		<Support/>,
+		document.getElementById('container')
+		);
+	},
+	invite: function(){
+	    React.render(
+		<TeamInvite/>,
+		document.getElementById('container')
+		);
+	},
+
 	teamprofile: function(teamid){
+		$(document.getElementById('container')).empty();
 		React.render(
 		<TeamProfile teamid = {teamid}/>,
 		document.getElementById('container')
@@ -116,6 +134,21 @@ window.myRouter = myRouter
 		document.getElementById('header')
 		);
 	})
+// 	var minimalData = {
+//     teams : [
+//       ["Team 1", "Team 2"], /* first matchup */
+//       ["Team 3", "Team 4"]  /* second matchup */
+//     ],
+//     results : [
+//       [[1,2], [3,4]],        first round 
+//       [[4,6], [2,1]]        /* second round */
+//     ]
+//   }
+ 
+// $(function() {
+//     $('#bracket').bracket({
+//       init: minimalData /* data to initialize the bracket with */ })
+//   })
 
 
 

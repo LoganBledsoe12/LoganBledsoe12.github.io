@@ -33501,7 +33501,11 @@ module.exports = React.createClass({
 		this.gettournaments(this);
 		window.events.userchanged = function () {
 			var currentUser = Parse.User.current();
-			me.setState({ username: currentUser.get('username') });
+			if (currentUser) {
+				me.setState({ username: currentUser.get('username') });
+			} else {
+				me.setState({ username: null });
+			}
 		};
 	},
 	GoToSignUp: function GoToSignUp() {
@@ -33582,6 +33586,11 @@ module.exports = React.createClass({
 			error: function error(_error3) {}
 		});
 	},
+	signout: function signout() {
+		window.userProfile = null;
+		Parse.User.logOut();
+		window.events.userchanged();
+	},
 
 	render: function render() {
 		var loginButton;
@@ -33622,7 +33631,42 @@ module.exports = React.createClass({
 				React.createElement('div', { className: 'logincontainerfour logincolum1' })
 			);
 		}
-
+		var loggedinhtml;
+		if (this.state.username) {
+			loggedinhtml = React.createElement(
+				'ul',
+				null,
+				React.createElement(
+					'li',
+					null,
+					React.createElement(
+						'a',
+						{ href: '#/invite' },
+						'Team Invites'
+					)
+				),
+				React.createElement(
+					'li',
+					null,
+					React.createElement(
+						'a',
+						{ href: '#profile' },
+						'My Profile'
+					)
+				),
+				React.createElement(
+					'li',
+					null,
+					React.createElement(
+						'a',
+						{ href: '#', onClick: this.signout },
+						'Sign Out'
+					)
+				)
+			);
+		} else {
+			loggedinhtml = '';
+		}
 		return React.createElement(
 			'nav',
 			{ className: 'navbar navbar-default' },
@@ -33670,33 +33714,7 @@ module.exports = React.createClass({
 									null,
 									signinhtml
 								),
-								React.createElement(
-									'li',
-									null,
-									React.createElement(
-										'a',
-										{ href: '#' },
-										'Team Invites'
-									)
-								),
-								React.createElement(
-									'li',
-									null,
-									React.createElement(
-										'a',
-										{ href: '#profile' },
-										'My Profile'
-									)
-								),
-								React.createElement(
-									'li',
-									null,
-									React.createElement(
-										'a',
-										{ href: '#' },
-										'Sign Out'
-									)
-								)
+								loggedinhtml
 							)
 						)
 					),
@@ -33708,7 +33726,7 @@ module.exports = React.createClass({
 							{ className: 'tournaments' },
 							React.createElement(
 								'a',
-								{ href: '#/tournament' },
+								{ href: '#/support' },
 								'Support'
 							)
 						),
@@ -33735,6 +33753,24 @@ module.exports = React.createClass({
 										)
 									);
 								})
+							)
+						),
+						React.createElement(
+							'li',
+							{ className: 'homepage' },
+							React.createElement(
+								'a',
+								{ href: '#/' },
+								'Home Page'
+							)
+						),
+						React.createElement(
+							'li',
+							{ className: 'buycreds' },
+							React.createElement(
+								'a',
+								{ href: '#/paypal' },
+								'Buy Credits'
 							)
 						)
 					)
@@ -33978,7 +34014,7 @@ module.exports = React.createClass({
 	}
 });
 
-},{"../models/UserProfileModel.js":172,"./PayPalComponent.js":165,"react":160,"validator":161}],167:[function(require,module,exports){
+},{"../models/UserProfileModel.js":174,"./PayPalComponent.js":165,"react":160,"validator":161}],167:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -34092,9 +34128,124 @@ function newUserProfile(username) {
 var React = require('react');
 var _ = require('backbone/node_modules/underscore');
 
+module.exports = React.createClass({
+	displayName: 'exports',
+
+	render: function render() {
+
+		var me = this;
+		return React.createElement(
+			'form',
+			null,
+			React.createElement(
+				'div',
+				{ className: 'support' },
+				'@Poonnie_'
+			)
+		);
+	}
+});
+
+},{"backbone/node_modules/underscore":2,"react":160}],169:[function(require,module,exports){
+'use strict';
+
+var React = require('react');
+var _ = require('backbone/node_modules/underscore');
+
+module.exports = React.createClass({
+	displayName: 'exports',
+
+	componentDidMount: function componentDidMount() {
+		this.getinvite(this);
+	},
+	getInitialState: function getInitialState() {
+
+		return { invites: [] };
+	},
+	tournamentjoin: function tournamentjoin() {
+		myRouter.navigate('/tournamentjoin/' + this.props.tournamentid, { trigger: true });
+	},
+
+	getinvite: function getinvite(me) {
+
+		var Invite = Parse.Object.extend('Invite');
+		var currentUser = Parse.User.current();
+		console.log(currentUser);
+		var me = this;
+		var query = new Parse.Query(Invite);
+		query.equalTo('UserId', window.userProfile.id);
+		query.include('Team');
+		query.find({
+			success: function success(results) {
+				me.setState({ invites: results });
+			},
+			error: function error(_error) {}
+		});
+	},
+	acceptinvite: function acceptinvite(m) {
+		console.log(m);
+		var me = this;
+		m.get('Team').add('Players', window.userProfile);
+		m.get('Team').save();
+		m.destroy({
+			success: function success() {
+				me.getinvite();
+			}
+		});
+	},
+	declineinvite: function declineinvite(m) {
+		var me = this;
+		m.destroy({
+			success: function success() {
+				me.getinvite();
+			}
+		});
+	},
+	render: function render() {
+
+		var me = this;
+		return React.createElement(
+			'form',
+			{ onSubmit: this.TournamentList },
+			this.state.invites.map(function (m, index) {
+				var TeamName = '';
+				if (m.get('Team')) {
+					TeamName = m.get('Team').get('Name');
+				}
+				return React.createElement(
+					'div',
+					null,
+					React.createElement(
+						'div',
+						{ className: 'teaminvite' },
+						TeamName
+					),
+					React.createElement(
+						'button',
+						{ onClick: me.acceptinvite.bind(me, m), className: 'acceptinv', type: 'button' },
+						'Accept'
+					),
+					React.createElement(
+						'button',
+						{ onClick: me.declineinvite.bind(me, m), className: 'acceptinv', type: 'button' },
+						'Decline'
+					)
+				);
+			})
+		);
+	}
+});
+
+},{"backbone/node_modules/underscore":2,"react":160}],170:[function(require,module,exports){
+'use strict';
+
+var React = require('react');
+var _ = require('backbone/node_modules/underscore');
+
 function getteam(e) {
 	var Team = Parse.Object.extend('Team');
 	var query = new Parse.Query(Team);
+	query.include('Players');
 	query.get(e.props.teamid, {
 		success: function success(results) {
 			e.setState({
@@ -34112,11 +34263,22 @@ module.exports = React.createClass({
 		getteam(this);
 	},
 	getInitialState: function getInitialState() {
-
-		return { team: new Parse.Object('Team') };
+		var t = new Parse.Object('Team');
+		t.set('Players', []);
+		return { team: t };
 	},
 	tournamentjoin: function tournamentjoin() {
 		myRouter.navigate('/tournamentjoin/' + this.props.tournamentid, { trigger: true });
+	},
+	removeplayer: function removeplayer(player) {
+		var me = this;
+		var p = this.state.team.get('Players');
+		var i = p.indexOf(player);
+		p.splice(i, 1);
+		this.state.team.set('Players', p);
+		this.state.team.save({ success: function success() {
+				getteam(me);
+			} });
 	},
 
 	getprofile: function getprofile(me) {
@@ -34124,23 +34286,20 @@ module.exports = React.createClass({
 		var UserProfile = Parse.Object.extend('UserProfile');
 		var currentUser = Parse.User.current();
 		console.log(currentUser);
+		var me = this;
 		var query = new Parse.Query(UserProfile);
 		query.equalTo('Username', username);
 		query.find({
 			success: function success(results) {
-				window.userProfile = results[0];
-				me.setState({
-					username: currentUser.attributes.username,
-					profile: results[0]
-				});
-				for (var i = 0; i < results.length; i++) {
-					var object = results[i];
-				}
+				var Invite = Parse.Object.extend('Invite');
+				var i = new Invite();
+				i.save({ UserId: results[0].id, Team: me.state.team });
 			},
 			error: function error(_error2) {}
 		});
 	},
 	render: function render() {
+		var me = this;
 
 		return React.createElement(
 			'form',
@@ -34151,6 +34310,18 @@ module.exports = React.createClass({
 				this.state.team.get('Name'),
 				' '
 			),
+			this.state.team.get('Players').map(function (m, index) {
+				return React.createElement(
+					'div',
+					null,
+					m.get('Username'),
+					React.createElement(
+						'button',
+						{ onClick: me.removeplayer.bind(me, m), className: 'removeplayer', type: 'button' },
+						'Remove Player'
+					)
+				);
+			}),
 			React.createElement(
 				'input',
 				{ ref: 'searchplayer', className: 'searchplayer' },
@@ -34159,13 +34330,13 @@ module.exports = React.createClass({
 			React.createElement(
 				'button',
 				{ onClick: this.getprofile, ref: 'search', className: 'search', type: 'button' },
-				'Search User '
+				'Invite User '
 			)
 		);
 	}
 });
 
-},{"backbone/node_modules/underscore":2,"react":160}],169:[function(require,module,exports){
+},{"backbone/node_modules/underscore":2,"react":160}],171:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -34261,7 +34432,7 @@ module.exports = React.createClass({
 	}
 });
 
-},{"backbone/node_modules/underscore":2,"react":160}],170:[function(require,module,exports){
+},{"backbone/node_modules/underscore":2,"react":160}],172:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -34326,7 +34497,7 @@ module.exports = React.createClass({
 	}
 });
 
-},{"backbone/node_modules/underscore":2,"react":160}],171:[function(require,module,exports){
+},{"backbone/node_modules/underscore":2,"react":160}],173:[function(require,module,exports){
 'use strict';
 
 var React = require('react');
@@ -34341,8 +34512,10 @@ var LogIn = require('./components/LogInComponent');
 var UserProfile = require('./components/ProfileComponent.js');
 var HomePage = require('./components/HomePageComponent.js');
 var Header = require('./components/HeaderComponent.js');
+var Support = require('./components/SupportComponent.js');
 var TeamProfile = require('./components/TeamProfileComponent.js');
 var PayPal = require('./components/PayPalComponent.js');
+var TeamInvite = require('./components/TeamInviteComponent.js');
 window.appKey = 'S50qociHrxbaE0knB6LZawcp4MdWiHFu7myR6tyw';
 window.appId = 'WfZ0jpkhseGLlEz2RcIhmkTK1jGQdvmILzE7dC7U';
 window.userProfile = null;
@@ -34362,13 +34535,23 @@ var App = Backbone.Router.extend({
 		'paypal': 'paypal',
 		'addcash': 'addcash',
 		'tournamentjoin/:tournamentid': 'tournamentjoin',
-		'teamprofile/:teamid': 'teamprofile'
+		'teamprofile/:teamid': 'teamprofile',
+		'invite': 'invite',
+		'support': 'support'
 
 	},
 	home: function home() {
 		React.render(React.createElement(HomePage, null), document.getElementById('container'));
 	},
+	support: function support() {
+		React.render(React.createElement(Support, null), document.getElementById('container'));
+	},
+	invite: function invite() {
+		React.render(React.createElement(TeamInvite, null), document.getElementById('container'));
+	},
+
 	teamprofile: function teamprofile(teamid) {
+		$(document.getElementById('container')).empty();
 		React.render(React.createElement(TeamProfile, { teamid: teamid }), document.getElementById('container'));
 	},
 	login: function login() {
@@ -34411,8 +34594,23 @@ window.myRouter = myRouter;
 $(function () {
 	React.render(React.createElement(Header, null), document.getElementById('header'));
 });
+// 	var minimalData = {
+//     teams : [
+//       ["Team 1", "Team 2"], /* first matchup */
+//       ["Team 3", "Team 4"]  /* second matchup */
+//     ],
+//     results : [
+//       [[1,2], [3,4]],        first round
+//       [[4,6], [2,1]]        /* second round */
+//     ]
+//   }
 
-},{"./components/HeaderComponent.js":162,"./components/HomePageComponent.js":163,"./components/LogInComponent":164,"./components/PayPalComponent.js":165,"./components/ProfileComponent.js":166,"./components/SignUpComponent":167,"./components/TeamProfileComponent.js":168,"./components/TournamentComponent.js":169,"./components/TournamentJoin.js":170,"backbone":1,"backbone/node_modules/underscore":2,"jquery":5,"react":160}],172:[function(require,module,exports){
+// $(function() {
+//     $('#bracket').bracket({
+//       init: minimalData /* data to initialize the bracket with */ })
+//   })
+
+},{"./components/HeaderComponent.js":162,"./components/HomePageComponent.js":163,"./components/LogInComponent":164,"./components/PayPalComponent.js":165,"./components/ProfileComponent.js":166,"./components/SignUpComponent":167,"./components/SupportComponent.js":168,"./components/TeamInviteComponent.js":169,"./components/TeamProfileComponent.js":170,"./components/TournamentComponent.js":171,"./components/TournamentJoin.js":172,"backbone":1,"backbone/node_modules/underscore":2,"jquery":5,"react":160}],174:[function(require,module,exports){
 'use strict';
 
 var Backbone = require('backparse')({
@@ -34432,7 +34630,7 @@ module.exports = Backbone.Model.extend({
 	idAttribute: 'objectId'
 });
 
-},{"backparse":3}]},{},[171])
+},{"backparse":3}]},{},[173])
 
 
 //# sourceMappingURL=all.js.map
