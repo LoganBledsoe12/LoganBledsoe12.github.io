@@ -15,7 +15,7 @@ function getteam(e){
 		  },
 		  error: function(error) {
 
-		  }
+		  } 
 		});
 	}
 module.exports = React.createClass({
